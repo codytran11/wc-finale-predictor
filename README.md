@@ -1,7 +1,7 @@
 # wc-finale-predictor
 Predicting the 2026 World Cup winner (Argentina vs Spain) with a Poisson goal model trained on 150 years of international match data.
 
-Inspired by @lerabyte on tiktok and https://data.fivethirtyeight.com/
+Inspired by @lerabyte on tiktok. Uses an Elo + Poisson approach similar to models like FiveThirtyEight's Soccer Predictions.
 
 Database: https://raw.githubusercontent.com/martj42/international_results/master/results.csv
   - Every international football match from 1872 all the way until now
@@ -51,5 +51,6 @@ Database: https://raw.githubusercontent.com/martj42/international_results/master
 ## Data Visualization:
 - Built with matplotlib and seaborn — a styled bar chart showing 90-minute win/draw/win probabilities
 - <img width="1120" height="928" alt="image" src="https://github.com/user-attachments/assets/f102526f-8080-48a4-b77c-b7ed2bb46a88" />
+
 
     
