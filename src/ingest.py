@@ -106,3 +106,4 @@ if __name__ == "__main__":
     else:
         print(f"Found existing CSV at {RAW_CSV_PATH}, skipping download.")
     load_into_postgres()
+    
