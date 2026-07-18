@@ -40,7 +40,8 @@ def get_connection():
 def h2h_key(a: str, b: str) -> tuple:
     """Order-independent key so Argentina-vs-Spain and Spain-vs-Argentina
     share the same head-to-head record."""
-    return tuple(sorted([a, b]))
+    return tuple(sorted([a, b])) # guarantees both produce the identical key ("Argentina", "Spain") 
+                                # regardless of who's home or away, so we always look up the same dictionary entry. 
 
 
 def compute_elo_and_h2h(matches: pd.DataFrame) -> pd.DataFrame:

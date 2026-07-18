@@ -117,14 +117,32 @@ def print_results(results: dict) -> None:
         print(f"  {HOME_TEAM} {h} - {a} {AWAY_TEAM}: {count / results['n']:.1%}")
 
 
+def download_flag(country_code: str, cache_dir: str) -> str | None:
+    """Download and cache a small flag PNG. Returns local file path, or None if it fails."""
+    os.makedirs(cache_dir, exist_ok=True)
+    local_path = os.path.join(cache_dir, f"{country_code}.png")
+    if not os.path.exists(local_path):
+        try:
+            import urllib.request
+            url = f"https://flagcdn.com/w80/{country_code}.png"
+            urllib.request.urlretrieve(url, local_path)
+        except Exception as e:
+            print(f"Could not download flag for {country_code}: {e}")
+            return None
+    return local_path
+
+
 def plot_results(results: dict, home_xg: float, away_xg: float) -> None:
+    import matplotlib.image as mpimg
+    from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+
     sns.set_style("white")
 
     labels = [f"{HOME_TEAM} win", "Draw", f"{AWAY_TEAM} win"]
     values = [results["home_win_90"], results["draw_90"], results["away_win_90"]]
-    colors = ["#C60B1E", "#B0B0B0", "#75AADB"]  # Spain red, neutral gray, Argentina sky blue
+    colors = ["#C60B1E", "#B0B0B0", "#75AADB"]
 
-    fig, ax = plt.subplots(figsize=(7, 5))
+    fig, ax = plt.subplots(figsize=(7, 5.8))
     fig.patch.set_facecolor("white")
 
     bars = ax.bar(labels, values, color=colors, width=0.6, edgecolor="white", linewidth=1.5, zorder=3)
@@ -148,7 +166,24 @@ def plot_results(results: dict, home_xg: float, away_xg: float) -> None:
 
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, fontsize=12, fontweight="medium", color="#333333")
-    ax.tick_params(axis="x", length=0)
+    ax.tick_params(axis="x", length=0, pad=32)  # extra padding so flags have room below labels
+
+    # download and place actual flag images below the relevant bars
+    cache_dir = os.path.join(os.path.dirname(__file__), "..", "data", "flags")
+    flag_files = {0: download_flag("es", cache_dir), 2: download_flag("ar", cache_dir)}
+
+    for x_pos, path in flag_files.items():
+        if path is None:
+            continue
+        img = mpimg.imread(path)
+        imagebox = OffsetImage(img, zoom=0.35)
+        ab = AnnotationBbox(
+            imagebox, (x_pos, 0),
+            xybox=(0, -58), xycoords=("data", "axes fraction"),
+            boxcoords="offset points", box_alignment=(0.5, 1),
+            frameon=False, annotation_clip=False,
+        )
+        ax.add_artist(ab)
 
     fig.suptitle(f"{HOME_TEAM} vs {AWAY_TEAM} — World Cup Final", fontsize=16, fontweight="bold", y=0.98, color="#1a1a1a")
     ax.set_title(
@@ -156,12 +191,10 @@ def plot_results(results: dict, home_xg: float, away_xg: float) -> None:
         fontsize=10.5, color="#666666", pad=15,
     )
 
-    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    plt.tight_layout(rect=[0, 0.05, 1, 0.94])
     out_path = os.path.join(os.path.dirname(__file__), "..", "final_prediction.png")
     plt.savefig(out_path, dpi=160, facecolor="white")
     print(f"\nSaved chart to {out_path}")
-
-
 if __name__ == "__main__":
     home_model, away_model = load_models()
     final_features = get_final_features()
